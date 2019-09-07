@@ -11,16 +11,41 @@ const router = new Router({
   routes: [
     {
       path: "/home",
-      name: "home",
+      name: "主页",
+      auth: true,
+      // redirect: "/",
+      menu: true,
+      meta: {
+        icon: "dashboard",
+        title: "仪表盘"
+      },
       component: () =>
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route
         // which is lazy-loaded when the route is visited.
         import(/* webpackChunkName: "layout" */ "./layouts/BasicLayout"),
-      children: []
+      children: [
+        {
+          path: "/home/child",
+          name: "主页的下一级",
+          auth: true,
+          // redirect: "/",
+          menu: true,
+          meta: {
+            icon: "edit",
+            title: "仪表盘"
+          }
+        }
+      ]
     },
     {
       path: "/user",
+      name: "用户中心",
+      menu: true,
+      meta: {
+        icon: "edit",
+        title: "用户中心"
+      },
       component: () =>
         import(/* webpackChunkName: "layout" */ "./layouts/UserLayout"),
       children: [

@@ -1,18 +1,21 @@
 <template>
   <div style="width: 256px">
     <a-menu
-      :defaultSelectKeys="['1']"
-      :defaultOpenKeys="['2']"
+      :selectedKeys="selectedKeys"
+      :openKeys.sync="openKeys"
       mode="inline"
       :theme="theme"
-      :inlineCollapsed="collapsed"
     >
-      <template v-for="item in list">
-        <a-menu-item v-if="!item.children" :key="item.key">
-          <a-icon type="pie-chart" />
-          <span>{{ item.title }}</span>
+      <template v-for="item in menuData">
+        <a-menu-item
+          v-if="!item.children"
+          :key="item.path"
+          @click="$router.push({ path: item.path, query: $route.query })"
+        >
+          <a-icon v-if="item.meta && item.meta.icon" :type="item.meta.icon" />
+          <span>{{ item.name }}</span>
         </a-menu-item>
-        <sub-menu v-else :menu-info="item" :key="item.key" />
+        <sub-menu v-else :menu-info="item" :key="item.path" />
       </template>
     </a-menu>
   </div>
@@ -30,36 +33,60 @@ export default {
   components: {
     "sub-menu": SubMenu
   },
+  watch: {
+    "$route.path": function(val) {
+      this.selectedKeys = this.selectedKeysMap[val];
+      this.openKeys = this.collapsed ? [] : this.openKeysMap[val];
+    }
+  },
   data() {
+    this.selectedKeysMap = {};
+    this.openKeysMap = {};
+    const menuData = this.getMenuData(this.$router.options.routes);
     return {
       collapsed: false,
-      list: [
-        {
-          key: "1",
-          title: "Test 1"
-        },
-        {
-          key: "2",
-          title: "Test 2",
-          children: [
-            {
-              key: "2.1",
-              title: "test 2.1",
-              children: [
-                {
-                  key: "2.1.1",
-                  title: "test 2.1.1"
-                }
-              ]
-            }
-          ]
-        }
-      ]
+      selectedKeys: this.selectedKeysMap[this.$route.path],
+      openKeys: this.collapsed ? [] : this.openKeysMap[this.$route.path],
+      menuData
     };
   },
   methods: {
     toggleCollapsed() {
       this.collapsed = !this.collapsed;
+    },
+    getMenuData(routes = [], parentKeys = [], selectedKeys) {
+      const menuData = [];
+      routes.forEach(item => {
+        if (item.name && item.menu) {
+          this.openKeysMap[item.path] = parentKeys;
+          this.selectedKeysMap[item.path] = [selectedKeys || item.path];
+          const newItem = { ...item };
+          delete newItem.children;
+          if (item.children) {
+            // 判断children中是否有item需要渲染上menu的
+            let isChildrenMenu = false;
+            item.children.forEach(route => {
+              if (route.menu) {
+                isChildrenMenu = true;
+              }
+            });
+            if (isChildrenMenu) {
+              newItem.children = this.getMenuData(item.children, [
+                ...parentKeys,
+                item.path
+              ]);
+            }
+          } else {
+            this.getMenuData(
+              item.children,
+              selectedKeys ? parentKeys : [...parentKeys, item.path],
+              selectedKeys || item.path
+            );
+          }
+          menuData.push(newItem);
+        }
+      });
+      return menuData;
     }
   }
 };

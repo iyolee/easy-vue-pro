@@ -1,5 +1,5 @@
 <template>
-  <a-layout id="components-layout-demo-side" style="min-height: 100vh">
+  <a-layout id="components-layout-side" style="min-height: 100vh">
     <a-layout-sider
       v-if="navLayout === 'left'"
       :theme="navTheme"
@@ -8,7 +8,12 @@
       v-model="collapsed"
       width="256px"
     >
-      <div class="logo" />
+      <div
+        :class="[navTheme === 'dark' ? 'dark-theme-word' : 'light-theme-word']"
+      >
+        Easy Vue Pro
+      </div>
+      <!-- <div class="logo" /> -->
       <SiderMenu :theme="navTheme" />
     </a-layout-sider>
     <a-layout>
@@ -61,7 +66,7 @@ export default {
 </script>
 
 <style>
-#components-layout-demo-custom-trigger .trigger {
+#components-layout-side .trigger {
   font-size: 18px;
   line-height: 64px;
   padding: 0 24px;
@@ -69,7 +74,21 @@ export default {
   transition: color 0.3s;
 }
 
-#components-layout-demo-custom-trigger .trigger:hover {
+#components-layout-side .trigger:hover {
   color: #1890ff;
+}
+
+#components-layout-side .dark-theme-word {
+  color: #fff;
+  font-size: 18px;
+  text-align: center;
+  margin-top: 10px;
+}
+
+#components-layout-side .light-theme-word {
+  color: #222;
+  font-size: 18px;
+  text-align: center;
+  margin-top: 10px;
 }
 </style>
