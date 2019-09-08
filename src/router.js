@@ -2,6 +2,8 @@ import Vue from "vue";
 import Router from "vue-router";
 import NProgress from "nprogress";
 import "nprogress/nprogress.css";
+import { findLast } from "./utils/utils";
+import { check, isLogin } from "./utils/auth";
 
 Vue.use(Router);
 
@@ -12,12 +14,12 @@ const router = new Router({
     {
       path: "/home",
       name: "主页",
-      auth: true,
       // redirect: "/",
       menu: true,
       meta: {
         icon: "dashboard",
-        title: "仪表盘"
+        title: "仪表盘",
+        authority: ["user"]
       },
       component: () =>
         // route level code-splitting
@@ -28,7 +30,7 @@ const router = new Router({
         {
           path: "/home/child",
           name: "主页的下一级",
-          auth: true,
+          // auth: true,
           // redirect: "/",
           menu: true,
           meta: {
@@ -44,7 +46,8 @@ const router = new Router({
       menu: true,
       meta: {
         icon: "edit",
-        title: "用户中心"
+        title: "用户中心",
+        authority: ["user"]
       },
       component: () =>
         import(/* webpackChunkName: "layout" */ "./layouts/UserLayout"),
@@ -63,12 +66,36 @@ const router = new Router({
         }
       ]
     }
+    // {
+    //   path: "/403",
+    //   name: "403"
+    // },
+    // {
+    //   path: "*",
+    //   name: "404"
+    // }
   ]
 });
 
 router.beforeEach((to, from, next) => {
   if (to.path !== from.path) {
     NProgress.start();
+  }
+  const record = findLast(
+    to.matched,
+    record => record.meta && record.meta.authority
+  );
+  if (record && record.meta && !check(record.meta.authority)) {
+    if (!isLogin() && to.path !== "/user/login") {
+      next({
+        path: "/user/login"
+      });
+    } else if (to.path !== "/403") {
+      next({
+        path: "/403"
+      });
+    }
+    NProgress.done();
   }
   next();
 });
