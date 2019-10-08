@@ -65,6 +65,18 @@ const router = new Router({
             import(/* webpackChunkName: "user" */ "./views/User/Register")
         }
       ]
+    },
+    {
+      path: "/form",
+      name: "自定义表单",
+      menu: true,
+      meta: {
+        icon: "edit",
+        title: "自定义表单",
+        authority: ["user"]
+      },
+      component: () =>
+        import(/* webpackChunkName: "layout" */ "./views/Form/Form.vue")
     }
     // {
     //   path: "/403",

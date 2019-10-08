@@ -18,3 +18,31 @@ export function findLast(arr, fn) {
   });
   return result.length ? result : undefined;
 }
+
+export function debounce(func, delay) {
+  let timeout;
+  return function(...args) {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => {
+      func.apply(null, args);
+    }, delay);
+  };
+}
+
+export function throttle(fn, threshhold) {
+  let timeout;
+  var start = +new Date();
+  threshhold = threshhold || 160;
+  return function(...args) {
+    const curr = +new Date();
+    clearTimeout(timeout);
+    if (curr - start >= threshhold) {
+      fn.apply(null, args);
+      start = curr;
+    } else {
+      timeout = setTimeout(() => {
+        fn.apply(null, args);
+      }, threshhold);
+    }
+  };
+}
